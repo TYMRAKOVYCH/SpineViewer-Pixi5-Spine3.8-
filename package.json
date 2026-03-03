@@ -1,0 +1,85 @@
+{
+  "name": "pixi-spine-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@pixi-spine/all-4.1": "^3.1.0",
+    "@pixi-spine/loader-base": "^3.1.0",
+    "core-js": "^3.6.5",
+    "debounce": "^1.2.0",
+    "element-ui": "^2.13.2",
+    "es6-tween": "^5.5.11",
+    "pixi.js": "^6.5.3",
+    "register-service-worker": "^1.7.1",
+    "vue": "^2.6.12",
+    "vue-resize": "^0.5.0",
+    "vuex": "^3.5.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.5.7",
+    "@vue/cli-plugin-eslint": "^4.5.7",
+    "@vue/cli-plugin-pwa": "^4.5.7",
+    "@vue/cli-service": "^4.5.7",
+    "@vue/eslint-config-airbnb": "^5.1.0",
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-component": "^1.1.1",
+    "eslint": "^6.8.0",
+    "eslint-plugin-vue": "^7.0.1",
+    "sass": "^1.70.0",
+    "sass-loader": "^10.0.2",
+    "vue-cli-plugin-element": "^1.0.1",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^4.44.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "@vue/airbnb"
+    ],
+    "rules": {
+      "no-param-reassign": [
+        "error",
+        {
+          "props": true,
+          "ignorePropertyModificationsFor": [
+            "state",
+            "acc",
+            "e",
+            "ctx",
+            "req",
+            "request",
+            "res",
+            "response",
+            "$scope"
+          ]
+        }
+      ],
+      "vue/custom-event-name-casing": 0
+    },
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 4 Chrome version",
+    "last 4 Safari version",
+    "last 4 Firefox version",
+    "last 4 Edge version",
+    "ie >= 11"
+  ]
+}
