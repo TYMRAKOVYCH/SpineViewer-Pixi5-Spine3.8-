@@ -273,7 +273,7 @@ export default {
       // eslint-disable-next-line no-plusplus
       for (let i = 0; i < json.length; i++) {
         const spineName = json[i].name.replace('.json', '');
-        const regexp = new RegExp(`${spineName}(_\\d+)?.(skel|atlas|png|jpg|webp|avif)$`);
+        const regexp = new RegExp(`${spineName}(_\\d+)?.(skel|atlas|png|jpg|jpeg|webp|avif)$`);
         this.options.push({
           label: spineName,
           value: spineName,
@@ -311,8 +311,9 @@ export default {
       }
 
       if (!asArray.some(endsWith('.png')) && !asArray.some(endsWith('.jpg'))
-        && !asArray.some(endsWith('.webp')) && !asArray.some(endsWith('.avif'))) {
-        this.errText = 'No png|jpg|webp|avif file selected';
+        && !asArray.some(endsWith('.jpeg')) && !asArray.some(endsWith('.webp'))
+        && !asArray.some(endsWith('.avif'))) {
+        this.errText = 'No png|jpg|jpeg|webp|avif file selected';
         return;
       }
 

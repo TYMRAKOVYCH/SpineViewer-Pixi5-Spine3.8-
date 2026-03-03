@@ -1,11 +1,11 @@
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js-legacy';
 import Vue from 'vue';
 import {
   SkeletonJson,
   SkeletonBinary,
   TextureAtlas,
   AtlasAttachmentLoader,
-} from '@pixi-spine/all-4.1';
+} from '@pixi-spine/all-3.8';
 import { imageLoaderAdapter } from '@pixi-spine/loader-base';
 
 export const EVENT_ADD_ANIMATION = 'EVENT_ADD_ANIMATION';
@@ -72,13 +72,11 @@ export const parseSpineFiles = (filesList) => new Promise((resolve, reject) => {
 
   const cachedName = `${rawSpineData.filename}_atlas_page_`;
   filesList
-    .filter((fileObj) => fileObj.filename.toLowerCase()
-      .endsWith('.png')
-      || fileObj.filename.toLowerCase()
-        .endsWith('.jpg')
-      || fileObj.filename.toLowerCase()
-        .endsWith('.webp') || fileObj.filename.toLowerCase()
-      .endsWith('.avif'))
+    .filter((fileObj) => {
+      const ext = fileObj.filename.toLowerCase();
+      return ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')
+        || ext.endsWith('.webp') || ext.endsWith('.avif');
+    })
     .forEach((fileObj) => {
       const resName = cachedName + fileObj.filename;
       const resource = new PIXI.LoaderResource(resName, '');

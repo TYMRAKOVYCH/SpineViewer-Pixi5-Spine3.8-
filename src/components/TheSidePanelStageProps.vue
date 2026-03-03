@@ -72,7 +72,7 @@
 
 <script>
 
-import { RENDERER_TYPE, utils } from 'pixi.js';
+import { RENDERER_TYPE, utils } from 'pixi.js-legacy';
 import { mapGetters } from 'vuex';
 import AppImageResource from './AppImageResource.vue';
 

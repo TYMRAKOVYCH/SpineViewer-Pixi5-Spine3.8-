@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const fs = require('fs');
 
 const packageJson = fs.readFileSync('./package-lock.json');
-const spineVersion = JSON.parse(packageJson).dependencies['@pixi-spine/all-4.1'].version;
+const spineVersion = JSON.parse(packageJson).dependencies['@pixi-spine/all-3.8'].version;
 
 module.exports = {
   productionSourceMap: true,
@@ -12,7 +12,7 @@ module.exports = {
         PIXI_SPINE_VERSION: JSON.stringify(spineVersion),
       }),
       new webpack.ProvidePlugin({
-        PIXI: 'pixi.js',
+        PIXI: 'pixi.js-legacy',
       }),
     ],
   },

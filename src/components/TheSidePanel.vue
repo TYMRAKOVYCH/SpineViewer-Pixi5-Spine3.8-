@@ -23,12 +23,7 @@
           </el-form-item>
         </el-form>
         <p class="small-text">
-          Pixi Spine Viewer (Pixi v{{PIXI_VERSION}}
-          Pixi-Spine v{{PIXI_SPINE_VERSION}} / 4.1)
-
-          <br>
-          <a href="../pixi-spine-viewer-4x-3_7/">Pixi v4.x & Spine 3.7 is here</a><br>
-          <a href="../pixi-spine-viewer-5x-3_8/">Pixi v5.x & Spine 3.8 is here</a>
+          Pixi v5.x & Spine 3.8
         </p>
         <br>
         <el-collapse>
@@ -50,7 +45,6 @@
 
 <script>
 
-import * as PIXI from 'pixi.js';
 import { Message } from 'element-ui';
 import TheSidePanelSlotContainers from '@/components/TheSidePanelSlotContainers.vue';
 import FilesUpload from './FilesUpload.vue';
@@ -70,11 +64,7 @@ export default {
     DirectoriesUpload,
   },
   data() {
-    return {
-      PIXI_VERSION: PIXI.VERSION,
-      // eslint-disable-next-line no-undef
-      PIXI_SPINE_VERSION,
-    };
+    return {};
   },
   methods: {
     $_handleSpineFilesChange(files) {

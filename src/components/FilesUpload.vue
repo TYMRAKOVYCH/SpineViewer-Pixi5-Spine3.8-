@@ -12,7 +12,7 @@
       <div slot="content">
         Click to select <br>
         or drag here <br>
-        *.json, *.atlas & *.png files
+        *.json, *.atlas & *.png, *.jpg, *.jpeg, *.webp, *.avif files
       </div>
       <el-button
           type="primary"
@@ -153,7 +153,7 @@ export default {
       let loadedCount = 0;
       const asArray = Array
         .from(files)
-        .filter((file) => (/\.(json|skel|atlas|png|jpg|webp|avif)$/i).test(file.name.toLowerCase()));
+        .filter((file) => (/\.(json|skel|atlas|png|jpg|jpeg|webp|avif)$/i).test(file.name.toLowerCase()));
 
       if (!asArray.some(endsWith('.json'))) {
         if (!asArray.some(endsWith('.skel'))) {
@@ -169,9 +169,10 @@ export default {
 
       if (!asArray.some(endsWith('.png'))
         && !asArray.some(endsWith('.jpg'))
+        && !asArray.some(endsWith('.jpeg'))
         && !asArray.some(endsWith('.webp'))
         && !asArray.some(endsWith('.avif'))) {
-        this.errText = 'No png|jpg|webp|avif file selected';
+        this.errText = 'No png|jpg|jpeg|webp|avif file selected';
         return;
       }
 
