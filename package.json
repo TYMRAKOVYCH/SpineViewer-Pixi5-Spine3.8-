@@ -8,13 +8,13 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@pixi-spine/all-4.1": "^3.1.0",
-    "@pixi-spine/loader-base": "^3.1.0",
+    "@pixi-spine/all-3.8": "^3.1.2",
+    "@pixi-spine/loader-base": "^3.1.2",
     "core-js": "^3.6.5",
     "debounce": "^1.2.0",
     "element-ui": "^2.13.2",
     "es6-tween": "^5.5.11",
-    "pixi.js": "^6.5.3",
+    "pixi.js-legacy": "^5.3.12",
     "register-service-worker": "^1.7.1",
     "vue": "^2.6.12",
     "vue-resize": "^0.5.0",
@@ -63,7 +63,8 @@
           ]
         }
       ],
-      "vue/custom-event-name-casing": 0
+      "vue/custom-event-name-casing": 0,
+      "linebreak-style": 0
     },
     "parserOptions": {
       "parser": "babel-eslint"

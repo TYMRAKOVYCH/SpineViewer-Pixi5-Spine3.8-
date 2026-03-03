@@ -1,11 +1,11 @@
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js-legacy';
 import Vue from 'vue';
 import {
   SkeletonJson,
   SkeletonBinary,
   TextureAtlas,
   AtlasAttachmentLoader,
-} from '@pixi-spine/all-4.1';
+} from '@pixi-spine/all-3.8';
 import { imageLoaderAdapter } from '@pixi-spine/loader-base';
 
 export const EVENT_ADD_ANIMATION = 'EVENT_ADD_ANIMATION';

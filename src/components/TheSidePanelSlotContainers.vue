@@ -44,8 +44,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { SpineSprite } from '@pixi-spine/all-4.1';
-import * as PIXI from 'pixi.js';
+import { SpineSprite } from '@pixi-spine/all-3.8';
+import * as PIXI from 'pixi.js-legacy';
 
 export default {
   name: 'TheSidePanelSlotContainers',

@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js-legacy';
 import App from './App.vue';
 import store from './store';
 import './registerServiceWorker';

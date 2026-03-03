@@ -20,7 +20,7 @@
 <script>
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js-legacy';
 import { debounce } from 'debounce';
 import { ResizeObserver } from 'vue-resize';
 import {
@@ -113,7 +113,7 @@ export default {
       backgroundColor: this.stageBGColor,
     };
 
-    this.canvasRenderer = new PIXI.Renderer({
+    this.canvasRenderer = new PIXI.CanvasRenderer({
       ...generalAppOptions,
       view: this.$refs.previewStageCanvas2d,
       width: this.$refs.previewStageCanvas2d.offsetWidth,
@@ -239,8 +239,10 @@ export default {
 
     this.canvasRenderer.view.removeEventListener('contextmenu', this.preventDef);
     this.canvasRenderer.destroy();
-    this.webGLRenderer.view.removeEventListener('contextmenu', this.preventDef);
-    this.webGLRenderer.destroy();
+    if (this.webGLRenderer) {
+      this.webGLRenderer.view.removeEventListener('contextmenu', this.preventDef);
+      this.webGLRenderer.destroy();
+    }
 
     this.interaction = null;
     this.renderer = null;
