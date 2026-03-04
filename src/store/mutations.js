@@ -80,6 +80,9 @@ export default {
   setUploadSource(state, source) {
     state.uploadSource = source;
   },
+  setParsingSpine(state, value) {
+    state.isParsingSpine = value;
+  },
   // reset to defaults
   cleanup(state) {
     state.spineData = null;

@@ -35,6 +35,7 @@ const state = {
   showEventDispose: false,
   pos: { x: 0, y: 0 },
   uploadSource: '',
+  isParsingSpine: false,
   slotContainer: [],
   isSetAnim: false,
   isPlaying: true,

@@ -27,7 +27,7 @@
       <el-button
           :loading="true"
           type="primary"
-      >{{loaded}}%</el-button>
+      >{{ loadingLabel }}</el-button>
     </div>
 
     <div class="" v-show="isSelected && !isLoading">
@@ -97,6 +97,12 @@ export default {
     },
     selectedFileNames() {
       return this.files.map((fileObj) => fileObj.filename);
+    },
+    loadingLabel() {
+      if (this.$store.getters.isParsingSpine) {
+        return 'Processing…';
+      }
+      return `${this.loaded}%`;
     },
   },
   created() {
@@ -178,17 +184,18 @@ export default {
 
       Promise.all(asArray.map((file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
+        const reportProgress = () => {
+          loadedCount += 1;
+          self.loaded = ((loadedCount * 100) / asArray.length).toFixed(2);
+          resolve();
+        };
         reader.onloadend = function onLoaded() {
-          // eslint-disable-next-line no-plusplus
-          loadedCount++;
-          // eslint-disable-next-line no-mixed-operators
-          self.loaded = (loadedCount * 100 / asArray.length).toFixed(2);
-
           self.files.push({
             filename: file.name,
             fileBody: reader.result,
+            ...(file.type && file.type.startsWith('image/') ? { mimeType: file.type } : {}),
           });
-          resolve();
+          reportProgress();
         };
 
         reader.onerror = reject;
@@ -198,13 +205,12 @@ export default {
         } else if (normalized.endsWith('.skel')) {
           reader.readAsArrayBuffer(file);
         } else {
-          reader.readAsDataURL(file);
+          reader.readAsArrayBuffer(file);
         }
       })))
         .then(() => {
           this.$emit('onChange', this.files);
-          this.isLoading = false;
-          this.loaded = 0;
+          this.loaded = '100';
         });
     },
     $_onDrop(e) {
@@ -250,6 +256,15 @@ export default {
               // this.dataUrl = '';
               // this.filename = '';
               self.$refs.input.value = '';
+            }
+          }),
+      );
+      this.watchers.push(
+        this.$store.watch((state) => state.isParsingSpine,
+          (isParsing) => {
+            if (!isParsing && this.$store.getters.uploadSource === 'files' && self.files.length > 0) {
+              self.isLoading = false;
+              self.loaded = 0;
             }
           }),
       );

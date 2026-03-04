@@ -32,6 +32,24 @@ const findByExtension = (filesList, extName) => {
   return result;
 };
 
+/** Convert data URL to Blob synchronously (avoids fetch roundtrip) */
+const dataURLToBlob = (dataURL) => {
+  const commaIdx = dataURL.indexOf(',');
+  const header = dataURL.slice(0, commaIdx);
+  const base64 = dataURL.slice(commaIdx + 1);
+  const mimeMatch = header.match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mime });
+};
+
+/** createImageBitmap options for atlas textures: skip EXIF orientation for speed */
+const CREATE_IMAGE_BITMAP_OPTS = { imageOrientation: 'none' };
+
 /**
  * @typedef ParsingSpineResult
  * @property spineData
@@ -39,7 +57,7 @@ const findByExtension = (filesList, extName) => {
  */
 /**
  *
- * @param {{filename:string,fileBody: string}[]} filesList
+ * @param {{filename:string,fileBody: string|ArrayBuffer,mimeType?:string}[]} filesList
  * @returns {Promise<ParsingSpineResult>}
  */
 export const parseSpineFiles = (filesList) => new Promise((resolve, reject) => {
@@ -71,37 +89,77 @@ export const parseSpineFiles = (filesList) => new Promise((resolve, reject) => {
   }
 
   const cachedName = `${rawSpineData.filename}_atlas_page_`;
-  filesList
-    .filter((fileObj) => {
-      const ext = fileObj.filename.toLowerCase();
-      return ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')
-        || ext.endsWith('.webp') || ext.endsWith('.avif');
+  const imageFiles = filesList.filter((fileObj) => {
+    const ext = fileObj.filename.toLowerCase();
+    return ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')
+      || ext.endsWith('.webp') || ext.endsWith('.avif');
+  });
+
+  const getBlob = (fileObj) => {
+    const body = fileObj.fileBody;
+    if (body instanceof ArrayBuffer) {
+      let mime = fileObj.mimeType;
+      if (!mime) {
+        const ext = fileObj.filename.toLowerCase();
+        if (ext.endsWith('.png')) mime = 'image/png';
+        else if (ext.endsWith('.webp')) mime = 'image/webp';
+        else if (ext.endsWith('.avif')) mime = 'image/avif';
+        else mime = 'image/jpeg';
+      }
+      return Promise.resolve(new Blob([body], { type: mime }));
+    }
+    if (typeof body === 'string' && body.startsWith('data:')) {
+      return Promise.resolve(dataURLToBlob(body));
+    }
+    return fetch(body).then((r) => r.blob());
+  };
+
+  const chain = Promise.all(imageFiles.map((fileObj) => getBlob(fileObj)
+    .then((blob) => {
+      if (typeof createImageBitmap !== 'function') {
+        return new Promise((res, rej) => {
+          const img = new Image();
+          img.onload = () => res(img);
+          img.onerror = rej;
+          img.src = URL.createObjectURL(blob);
+        });
+      }
+      return createImageBitmap(blob, CREATE_IMAGE_BITMAP_OPTS).catch(() => createImageBitmap(blob));
     })
-    .forEach((fileObj) => {
+    .then((source) => {
       const resName = cachedName + fileObj.filename;
       const resource = new PIXI.LoaderResource(resName, '');
-      resource.texture = PIXI.Texture.from(fileObj.fileBody);
+      resource.texture = PIXI.Texture.from(source);
+      if (source instanceof HTMLImageElement && source.src && source.src.startsWith('blob:')) {
+        URL.revokeObjectURL(source.src);
+      }
       PIXI.Loader.shared.resources[resName] = resource;
+    })))
+    .then(() => {
+      const adapter = imageLoaderAdapter(PIXI.Loader.shared, cachedName, '', {});
+
+      const onAtlasLoaded = (spineAtlas) => {
+        parser.attachmentLoader = new AtlasAttachmentLoader(spineAtlas);
+
+        let spineData;
+        try {
+          spineData = parser.readSkeletonData(dataToParse);
+        } catch (e) {
+          reject(e);
+          return;
+        }
+
+        resolve({
+          spineData,
+          spineAtlas,
+        });
+      };
+
+      // eslint-disable-next-line no-new
+      new TextureAtlas(rawAtlas.fileBody, adapter, onAtlasLoaded);
     });
-  const adapter = imageLoaderAdapter(PIXI.Loader.shared, cachedName, '', {});
 
-  // eslint-disable-next-line no-new
-  new TextureAtlas(rawAtlas.fileBody, adapter, ((spineAtlas) => {
-    parser.attachmentLoader = new AtlasAttachmentLoader(spineAtlas);
-
-    let spineData;
-    try {
-      spineData = parser.readSkeletonData(dataToParse);
-    } catch (e) {
-      reject(e);
-      return;
-    }
-
-    resolve({
-      spineData,
-      spineAtlas,
-    });
-  }));
+  chain.then(null, reject);
 });
 
 export const cleanupSpineData = () => {

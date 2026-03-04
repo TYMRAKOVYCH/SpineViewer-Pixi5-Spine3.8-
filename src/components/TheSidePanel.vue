@@ -71,7 +71,11 @@ export default {
       this.$store.dispatch('changeVersion');
       this.$store.dispatch('parseFiles', files)
         .catch((reason) => {
-          this.$refs.spineFiles.reset();
+          if (this.$store.getters.uploadSource === 'directory') {
+            this.$refs.spine.reset();
+          } else {
+            this.$refs.spineFiles.reset();
+          }
           Message({
             type: 'error',
             message: reason,

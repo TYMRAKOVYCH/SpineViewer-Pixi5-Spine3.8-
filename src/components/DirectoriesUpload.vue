@@ -28,7 +28,7 @@
       <el-button
         :loading="true"
         type="primary"
-      >{{loaded}}%</el-button>
+      >{{ loadingLabel }}</el-button>
     </div>
 
     <div class="" v-show="isSelected && !isLoading">
@@ -140,6 +140,12 @@ export default {
     selectedFileNames() {
       return this.files.map((fileObj) => fileObj.filename);
     },
+    loadingLabel() {
+      if (this.$store.getters.isParsingSpine) {
+        return 'Processing…';
+      }
+      return `${this.loaded}%`;
+    },
   },
   created() {
     /** @type {Function[]} */
@@ -190,6 +196,7 @@ export default {
           self.files.push({
             filename: file.name,
             fileBody: reader.result,
+            ...(file.type && file.type.startsWith('image/') ? { mimeType: file.type } : {}),
           });
           resolve();
         };
@@ -201,13 +208,12 @@ export default {
         } else if (normalized.endsWith('.skel')) {
           reader.readAsArrayBuffer(file);
         } else {
-          reader.readAsDataURL(file);
+          reader.readAsArrayBuffer(file);
         }
       })))
         .then(() => {
           this.$emit('onChange', this.files);
-          this.isLoading = false;
-          this.loaded = 0;
+          this.loaded = '100';
         });
     },
     $_uploadNewVersionOfFiles() {
@@ -223,6 +229,7 @@ export default {
           self.files.push({
             filename: file.name,
             fileBody: reader.result,
+            ...(file.type && file.type.startsWith('image/') ? { mimeType: file.type } : {}),
           });
           resolve();
         };
@@ -234,13 +241,12 @@ export default {
         } else if (normalized.endsWith('.skel')) {
           reader.readAsArrayBuffer(file);
         } else {
-          reader.readAsDataURL(file);
+          reader.readAsArrayBuffer(file);
         }
       })))
         .then(() => {
           this.$emit('onChange', this.files);
-          this.isLoading = false;
-          this.loaded = 0;
+          this.loaded = '100';
         });
     },
     $_handleFileChange(e) {
@@ -267,9 +273,8 @@ export default {
       let loadedCount = 0;
       let asArray;
 
-      const json = Array
-        .from(files)
-        .filter((file) => (/\.(json)$/i).test(file.name.toLowerCase()));
+      const filesArray = Array.from(files);
+      const json = filesArray.filter((file) => (/\.(json)$/i).test(file.name.toLowerCase()));
       // eslint-disable-next-line no-plusplus
       for (let i = 0; i < json.length; i++) {
         const spineName = json[i].name.replace('.json', '');
@@ -278,14 +283,10 @@ export default {
           label: spineName,
           value: spineName,
         });
-        asArray = Array
-          .from(files)
-          .filter((file) => (file.filepath.includes('/1') && regexp.test(file.name))
+        asArray = filesArray.filter((file) => (file.filepath.includes('/1') && regexp.test(file.name))
             || file.name.includes(`${spineName}.json`));
 
-        const mobileArray = Array
-          .from(files)
-          .filter((file) => (file.filepath.includes('/0.6') && regexp.test(file.name))
+        const mobileArray = filesArray.filter((file) => (file.filepath.includes('/0.6') && regexp.test(file.name))
             || file.name.includes(`${spineName}.json`));
 
         this.filesFromInput[spineName] = {
@@ -319,17 +320,18 @@ export default {
 
       Promise.all(asArray.map((file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
+        const reportProgress = () => {
+          loadedCount += 1;
+          self.loaded = ((loadedCount * 100) / asArray.length).toFixed(2);
+          resolve();
+        };
         reader.onloadend = function onLoaded() {
-          // eslint-disable-next-line no-plusplus
-          loadedCount++;
-          // eslint-disable-next-line no-mixed-operators
-          self.loaded = (loadedCount * 100 / asArray.length).toFixed(2);
-
           self.files.push({
             filename: file.name,
             fileBody: reader.result,
+            ...(file.type && file.type.startsWith('image/') ? { mimeType: file.type } : {}),
           });
-          resolve();
+          reportProgress();
         };
 
         reader.onerror = reject;
@@ -339,13 +341,12 @@ export default {
         } else if (normalized.endsWith('.skel')) {
           reader.readAsArrayBuffer(file);
         } else {
-          reader.readAsDataURL(file);
+          reader.readAsArrayBuffer(file);
         }
       })))
         .then(() => {
           this.$emit('onChange', this.files);
-          this.isLoading = false;
-          this.loaded = 0;
+          this.loaded = '100';
         });
     },
     $_onDrop(e) {
@@ -415,6 +416,8 @@ export default {
       this.loaded = 0;
       this.radioCheck = '1.0';
       this.options = [];
+      this.value = '';
+      this.filesFromInput = {};
 
       // this.dataUrl = '';
       // this.filename = '';
@@ -436,6 +439,15 @@ export default {
               // this.dataUrl = '';
               // this.filename = '';
               self.$refs.input.value = '';
+            }
+          }),
+      );
+      this.watchers.push(
+        this.$store.watch((state) => state.isParsingSpine,
+          (isParsing) => {
+            if (!isParsing && this.$store.getters.uploadSource === 'directory' && self.files.length > 0) {
+              self.isLoading = false;
+              self.loaded = 0;
             }
           }),
       );

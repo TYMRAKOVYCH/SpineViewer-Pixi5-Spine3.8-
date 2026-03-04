@@ -51,3 +51,4 @@ export const showEnd = (state) => state.showEventEnd;
 export const showInterrupt = (state) => state.showEventInterrupt;
 export const showDispose = (state) => state.showEventDispose;
 export const uploadSource = (state) => state.uploadSource;
+export const isParsingSpine = (state) => state.isParsingSpine;
